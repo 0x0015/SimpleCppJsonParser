@@ -10,7 +10,7 @@ enum JsonType{
 	JsonGeneric=0,
 	JsonNone=0,
 	JsonArray=2,
-	JsonMap=3,
+	JsonDictionary=3,
 	JsonBoolean=4,
 	JsonNumber=5
 };
@@ -19,10 +19,11 @@ class JsonValue{
 	public:
 		int type;
 		vector<JsonValue> list;
-		map<string, JsonValue> dict;
+		vector<string> dictKey;
+		vector<JsonValue> dictValue;
 		string value;
-		bool boolean; //impliment later
-		double number;//impliment later
+		bool boolean;
+		double number;
 		void print(){
 			if(type == 0){
 				cout<<"Generic Json Value"<<endl;
@@ -34,7 +35,7 @@ class JsonValue{
 				cout<<"Array Json value"<<endl;
 			}
 			if(type == 3){
-				cout<<"Map Json value"<<endl;
+				cout<<"Dictionary Json value"<<endl;
 			}
 			if(type == 4){
 				cout<<"Boolean Json Value"<<endl;
@@ -70,13 +71,15 @@ class JsonValue{
 			}
 			}
 		}
-		void setValue(map<string, JsonValue> v){
+		void setValue(vector<string> k, vector<JsonValue> v){
 			if(type == 0){
-				dict = v;
+				dictKey = k;
+				dictValue = v;
 				type = 3;
 			}else{
 			if(type == 3){
-				dict = v;
+				dictKey = k;
+				dictValue = v;
 			}else{
 				cout<<"Json Error:  attempting to set type " + to_string(type) + " Json value to a map"<<endl;
 			}
@@ -115,9 +118,35 @@ class JsonValue{
 		}
 		void addValue(string k, JsonValue v){
 			if(type == 3){
-				dict[k] = v;
+				dictValue.push_back(v);
+				dictKey.push_back(k);
+				if(dictKey.size() != dictValue.size()){
+					cout<<"Json Error:  for some reason the number of dictionary keys and values is unequal"<<endl;
+				}
 			}else{
 				cout<<"Json Error:  trying to insert a type " + to_string(v.type) + " Json value into a map"<<endl;
+			}
+		}
+		JsonValue getValue(int i){
+			if(type == 2){
+				return(list[i]);
+			}else{
+				cout<<"Json Error:  attempting to get the list value of a type " + to_string(type) + " Json value"<<endl;
+			}
+		}
+		JsonValue getValue(string k){
+			if(type == 3){
+				if(dictKey.size() != dictValue.size()){
+					cout<<"Json Error:  for some reason the number of dictionary keys and values is unequal"<<endl;
+				}
+				for(int i=0;i<dictKey.size();i++){
+					if(dictKey[i] == k){
+						return(dictValue[i]);
+					}
+				}
+				cout<<"Json Error:  unable to find dictionary value for key: " + k <<endl;
+			}else{
+				cout<<"Json Error:  attempting to get the dictionary value of a type " + to_string(type) + " Json value"<<endl;
 			}
 		}
 		string exportJson(){
@@ -145,12 +174,16 @@ class JsonValue{
 				}
 			}
 			if(type == 3){
-				if(dict.size() < 1){
+				if(dictKey.size() != dictValue.size()){
+					cout<<"Json Error:  for some reason the number of dictionary keys and values is unequal"<<endl;
+				}
+				if(dictKey.size() < 1){
 					output = "{}";
 				}else{
 				output = output + "{\n";
-				for(auto& x : dict){
-					output = output + "\"" + x.first + "\" : " + x.second.exportJson();
+				
+				for(int i=0;i<dictKey.size();i++){
+					output = output + "\"" + dictKey[i] + "\" : " + dictValue[i].exportJson();
 					output = output + ",\n";
 				}
 				if(output.substr(output.size()-2, 1) == ","){
@@ -177,7 +210,7 @@ class JsonValue{
 		string getStringAt(string data, size_t index){
 			return(data.substr(index, 1));
 		}
-		string findEndString(string data){//fix problem with space in front of first quotation mark.  maybe just require quotation mark
+		string findEndString(string data){
 			int i=0;
 			string output = "";
 			if(getStringAt(data, 0) == "\""){
@@ -284,9 +317,8 @@ class JsonValue{
 			}
 			return(output);
 		}
-		bool importJson(string d){//add object/dict support
+		bool importJson(string d){
 			string data = preprocessStringWhitespace(d);
-			//string data = d;
 			if(type != 0){
 				cout<<"Json Import Error:  please only import Json Data to a blank JsonValue"<<endl;
 				return(false);
@@ -326,7 +358,11 @@ class JsonValue{
 					if(getStringAt(key, key.size()-1) == "\""){
 						key = key.substr(0, key.size()-1);
 					}
-					dict[key]=temp;
+					dictValue.push_back(temp);
+					dictKey.push_back(key);
+					if(dictKey.size() != dictValue.size()){
+						cout<<"Json Error:  for some reason the number of dictionary keys and values is unequal"<<endl;
+					}
 				}
 			}
 			if(data.substr(0,4) == "true"){
@@ -378,9 +414,10 @@ class JsonValue{
 			type = 2;
 			list = l;
 		}
-		JsonValue(map<string, JsonValue> m){
+		JsonValue(vector<string> k, vector<JsonValue> v){
 			type = 3;
-			dict = m;
+			dictValue = v;
+			dictKey = k;
 		}
 		JsonValue(bool b){
 			//cout<<"boolean initializer"<<endl;
