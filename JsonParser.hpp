@@ -149,13 +149,73 @@ class JsonValue{
 				cout<<"Json Error:  attempting to get the dictionary value of a type " + to_string(type) + " Json value"<<endl;
 			}
 		}
+		string getStringAt(string data, size_t index){
+			return(data.substr(index, 1));
+		}
+		string convertToEscapes(string source){
+			string output = "";
+			for(int i=0;i<source.size();i++){
+				if(getStringAt(source, i) == "\\"){
+					output = output + "\\\\";
+				}else if(getStringAt(source, i) == "\""){
+					output = output + "\\\"";
+				}else if(getStringAt(source, i) == "\n"){
+					output = output + "\\n";
+				}else if(getStringAt(source, i) == "\t"){
+					output = output + "\\t";
+				}else if(getStringAt(source, i) == "\f"){
+					output = output + "\\f";
+				}else if(getStringAt(source, i) == "\b"){
+					output = output + "\\b";
+				}else if(getStringAt(source, i) == "\r"){
+					output = output + "\\r";
+				}else{
+					output = output + getStringAt(source, i);
+				}
+			}
+			return(output);
+		}
+		string convertFromEscapes(string source){
+			string output = "";
+			for(int i=0;i<source.size()-1;i++){
+				if(getStringAt(source, i) == "\\"){
+				if(getStringAt(source, i+1) == "\\"){
+					output = output + "\\";
+					i++;
+				}else if(getStringAt(source, i+1) == "\""){
+					output = output + "\"";
+					i++;
+				}else if(getStringAt(source, i+1) == "n"){
+					output = output + "\n";
+					i++;
+				}else if(getStringAt(source, i+1) == "t"){
+					output = output + "\t";
+					i++;
+				}else if(getStringAt(source, i+1) == "f"){
+					output = output + "\f";
+					i++;
+				}else if(getStringAt(source, i+1) == "b"){
+					output = output + "\b";
+					i++;
+				}else if(getStringAt(source, i+1) == "r"){
+					output = output + "\r";
+					i++;
+				}else{
+					output = output + getStringAt(source, i);
+				}
+				}else{
+					output = output + getStringAt(source, i);
+				}
+			}
+			return(output);
+		}
 		string exportJson(){
 			string output = "";
 			if(type == 0){
 			
 			}
 			if(type == 1){
-				output = "\"" + value + "\"";//could just return(and might for optimization) but for now just stay the same.
+				output = "\"" + convertToEscapes(value) + "\"";//could just return(and might for optimization) but for now just stay the same.
 			}
 			if(type == 2){
 				if(list.size() < 1){
@@ -206,23 +266,32 @@ class JsonValue{
 				output = "null";
 			}
 			return(output);
-		}
-		string getStringAt(string data, size_t index){
-			return(data.substr(index, 1));
-		}
+		}	
 		string findEndString(string data){
 			int i=0;
 			string output = "";
 			if(getStringAt(data, 0) == "\""){
 				i++;
 			}
+			bool continuing = true;
 			while(i<data.size()){
+				//cout<<getStringAt(data, i)<<endl;
 				if(getStringAt(data,i) == "\""){
-					return(output);
+					if(getStringAt(data, i-1) == "\\"){
+						if(getStringAt(data, i-2) == "\\"){
+							i++;
+							continue;
+						}	
+					}else{
+						return(output);
+					}
 				}
 				output = output + getStringAt(data,i);
 				i++;
+				
 			}
+			
+			
 			cout<<"Json Import Error:  never found string end!"<<endl;
 			return(output);
 		}
@@ -325,7 +394,9 @@ class JsonValue{
 			}
 			if(getStringAt(data,0) == "\""){
 				type = 1;
-				value = findEndString(data);
+				//cout<<data<<endl;
+				//cout<<findEndString(data)<<endl;
+				value = convertFromEscapes(findEndString(data));
 			}
 			if(getStringAt(data,0) == "["){
 				type = 2;
