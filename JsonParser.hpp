@@ -47,6 +47,9 @@ class JsonValue{
 				cout<<"Null Json Value"<<endl;
 			}
 		}
+		JsonType getType(){
+			return(type);
+		}
 		void setValue(string v){
 			if(type == 0){
 				value = v;
@@ -131,7 +134,11 @@ class JsonValue{
 			if(type == 2){
 				return(list[i]);
 			}else{
-				cout<<"Json Error:  attempting to get the list value of a type " + to_string(type) + " Json value"<<endl;
+				if(type == 3){
+					return(dictValue[i]);
+				}else{
+					cout<<"Json Error:  attempting to get the list value of a type " + to_string(type) + " Json value"<<endl;
+				}
 			}
 		}
 		JsonValue getValue(string k){
@@ -175,6 +182,18 @@ class JsonValue{
 			}else{
 				cout<<"Json Error:  attempting to get the dictionary value of a type " + to_string(type) + " Json value"<<endl;
 			}
+		}
+		int getLength(){
+			if(type == 2){
+				return(list.size());
+			}else{
+				if(type == 3){
+					return(dictKey.size());
+				}else{
+					cout<<"Json Error:  attempting to get the size of a non array or dictionary type element"<<endl;
+				}
+			}
+			return(0);
 		}
 		string getStringAt(string data, size_t index){
 			return(data.substr(index, 1));
@@ -472,16 +491,16 @@ class JsonValue{
 				boolean = false;
 			}
 			if((getStringAt(data, 0) == "0") ||
-					(getStringAt(data, 0) == "1") ||
-					(getStringAt(data, 0) == "2") ||
-					(getStringAt(data, 0) == "3") ||
-					(getStringAt(data, 0) == "4") ||
-					(getStringAt(data, 0) == "5") ||
-					(getStringAt(data, 0) == "6") ||
-					(getStringAt(data, 0) == "7") ||
-					(getStringAt(data, 0) == "8") ||
-					(getStringAt(data, 0) == "9") ||
-					(getStringAt(data, 0) == ".")){
+			   (getStringAt(data, 0) == "1") ||
+			   (getStringAt(data, 0) == "2") ||
+			   (getStringAt(data, 0) == "3") ||
+			   (getStringAt(data, 0) == "4") ||
+			   (getStringAt(data, 0) == "5") ||
+			   (getStringAt(data, 0) == "6") ||
+			   (getStringAt(data, 0) == "7") ||
+			   (getStringAt(data, 0) == "8") ||
+			   (getStringAt(data, 0) == "9") ||
+			   (getStringAt(data, 0) == ".")){
 				type = 5;
 				number = stod(data);
 			}
