@@ -149,6 +149,33 @@ class JsonValue{
 				cout<<"Json Error:  attempting to get the dictionary value of a type " + to_string(type) + " Json value"<<endl;
 			}
 		}
+		bool hasValue(int i){
+			if(type == 2){
+				if(list.size() > i){
+					return(true);
+				}else{
+					return(false);
+				}
+			}else{
+				cout<<"Json Error:  attempting to get the list value of a type " + to_string(type) + " Json value"<<endl;
+			}
+			return(false);
+		}
+		bool hasValue(string k){
+			if(type == 3){
+				if(dictKey.size() != dictValue.size()){
+					cout<<"Json Error:  for some reason the number of dictionary keys and values is unequal"<<endl;
+				}
+				for(int i=0;i<dictKey.size();i++){
+					if(dictKey[i] == k){
+						return(true);
+					}
+				}
+				return(false);
+			}else{
+				cout<<"Json Error:  attempting to get the dictionary value of a type " + to_string(type) + " Json value"<<endl;
+			}
+		}
 		string getStringAt(string data, size_t index){
 			return(data.substr(index, 1));
 		}
