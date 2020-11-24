@@ -156,7 +156,7 @@ class JsonValue{
 			}else{
 				cout<<"Json Error:  attempting to get the dictionary value of a type " + to_string(type) + " Json value"<<endl;
 			}
-			return(null);
+			return(JsonValue(0));
 		}
 		bool hasValue(int i){
 			if(type == 2){
@@ -168,7 +168,7 @@ class JsonValue{
 			}else{
 				cout<<"Json Error:  attempting to get the list value of a type " + to_string(type) + " Json value"<<endl;
 			}
-			return(false);
+			return(JsonValue(0));
 		}
 		bool hasValue(string k){
 			if(type == 3){
