@@ -48,7 +48,7 @@ class JsonValue{
 			}
 		}
 		JsonType getType(){
-			return(type);
+			return((JsonType)type);
 		}
 		void setValue(string v){
 			if(type == 0){
